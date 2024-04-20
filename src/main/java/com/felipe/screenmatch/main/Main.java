@@ -11,10 +11,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -70,7 +67,7 @@ public class Main {
         episodes = seasons.stream()
                 .flatMap(t ->
                         t.episodes().stream()
-                        .map(e -> new Episode(t.number(), e)))
+                                .map(e -> new Episode(t.number(), e)))
                 .toList();
         // .toList() creates a immutable list
         // .collect(Collectors(collections.toList()) creates a mutable list
@@ -81,41 +78,61 @@ public class Main {
 //                .forEach(System.out::println);
 //
 //        episodes.forEach(System.out::println);
-        List<Integer> years;
-        years = episodes.stream()
-                .filter(e -> e.getReleaseDate() != null)
-                .map(e -> e.getReleaseDate().getYear())
-                .collect(Collectors.toSet())
-                .stream()
-                .sorted()
-                .toList();
+//        List<Integer> years;
+//        years = episodes.stream()
+//                .filter(e -> e.getReleaseDate() != null)
+//                .map(e -> e.getReleaseDate().getYear())
+//                .collect(Collectors.toSet())
+//                .stream()
+//                .sorted()
+//                .toList();
+//
+//
+//        System.out.println("Select a year for " + tvShowName + ":");
+//        int counter = 1;
+//        for (int year : years) {
+//            System.out.println(counter + ". " + year);
+//            counter++;
+//        }
+//        System.out.println("Enter your selection (or 0 to quit): ");
+//        int year = reader.nextInt();
+//        reader.nextLine();
+//
+//        LocalDate searchYear = LocalDate.of(year, 1, 1);
+//        System.out.printf("%nTop 10 %s episodes from %d onwards: %n", tvShowName,year);
+//        DateTimeFormatter formatDate = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+//        episodes.stream()
+//                .filter(e ->
+//                        e.getReleaseDate() != null && e.getReleaseDate().isAfter(searchYear))
+//                .sorted(Comparator.comparing(Episode::getRating).reversed())
+//                .limit(10)
+//                .forEach(e -> System.out.println(
+//                        "Season: " + e.getSeason() +
+//                        " - Episode: " + e.getTitle() +
+//                        " - Release Year: " + e.getReleaseDate().format(formatDate) +
+//                        " - Rating: " + e.getRating()
+//                ));
 
-
-        System.out.println("Select a year for " + tvShowName + ":");
-        int counter = 1;
-        for (int year : years) {
-            System.out.println(counter + ". " + year);
-            counter++;
-        }
-        System.out.println("Enter your selection (or 0 to quit): ");
-        int year = reader.nextInt();
-        reader.nextLine();
-
-        LocalDate searchYear = LocalDate.of(year, 1, 1);
-        System.out.printf("%nTop 10 %s episodes from %d onwards: %n", tvShowName,year);
-        DateTimeFormatter formatDate = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        episodes.stream()
-                .filter(e ->
-                        e.getReleaseDate() != null && e.getReleaseDate().isAfter(searchYear))
-                .sorted(Comparator.comparing(Episode::getRating).reversed())
-                .limit(10)
-                .forEach(e -> System.out.println(
-                        "Season: " + e.getSeason() +
-                        " - Episode: " + e.getTitle() +
-                        " - Release Year: " + e.getReleaseDate().format(formatDate) +
-                        " - Rating: " + e.getRating()
+        Map<Integer, Double> seasonRating;
+        seasonRating = episodes.stream()
+                .filter(e -> e.getRating() > 0.0)
+                .collect(Collectors.groupingBy(
+                        Episode::getSeason,
+                        Collectors.averagingDouble(Episode::getRating)
                 ));
 
+        System.out.println(seasonRating);
+
+        DoubleSummaryStatistics est;
+        est = episodes.stream()
+                .filter(e -> e.getRating() > 0.0)
+                .collect(Collectors.summarizingDouble(Episode::getRating));
+
+        System.out.println("\nAverage: " + est.getAverage());
+        System.out.println("Min: " + est.getMin());
+        System.out.println("Max: " + est.getMax());
+        System.out.println("Quantity: " + est.getCount() ) ;
+        System.out.println("\n");
     }
 }
 
